@@ -17,7 +17,7 @@ def _carregar_env_local():
             continue
 
         chave, valor = linha.split("=", 1)
-        chave = chave.strip()
+        chave = chave.strip().lstrip("\ufeff")
         valor = valor.strip().strip('"').strip("'")
         os.environ.setdefault(chave, valor)
 
@@ -28,7 +28,7 @@ _carregar_env_local()
 # setx GEMINI_API_KEY "sua-chave"
 # Ou crie um arquivo .env local com GEMINI_API_KEY=sua-chave
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite").strip()
 
 # Monitores do mss:
 # 0 = area virtual com todos os monitores
