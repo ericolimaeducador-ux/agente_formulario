@@ -4,12 +4,11 @@ import json
 from google import genai
 from google.genai import types
 
-from config import CAMPOS_FORMULARIO, GEMINI_API_KEY
+from config import CAMPOS_FORMULARIO, GEMINI_API_KEY, GEMINI_MODEL
 
 
 TIPOS_FORMULARIO = set(CAMPOS_FORMULARIO)
 _CLIENT = None
-MODEL_NAME = "gemini-1.5-flash"
 
 
 def _obter_cliente():
@@ -29,7 +28,7 @@ def _obter_cliente():
 def _gerar_com_imagem(img_data, prompt):
     cliente = _obter_cliente()
     return cliente.models.generate_content(
-        model=MODEL_NAME,
+        model=GEMINI_MODEL,
         contents=[
             types.Part.from_bytes(data=img_data, mime_type="image/png"),
             prompt,

@@ -28,6 +28,7 @@ _carregar_env_local()
 # setx GEMINI_API_KEY "sua-chave"
 # Ou crie um arquivo .env local com GEMINI_API_KEY=sua-chave
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "").strip()
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
 
 # Monitores do mss:
 # 0 = area virtual com todos os monitores
