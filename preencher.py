@@ -24,6 +24,11 @@ CHECKBOX_FIELDS = {
     "nao_encontrei_veiculo",
 }
 
+SELECT_BY_INDEX = {
+    # Segunda opcao da lista suspensa do Tipo de veiculo.
+    "tipo_veiculo": 2,
+}
+
 
 def _campos_por_formulario():
     campos_por_tipo = {}
@@ -138,25 +143,18 @@ def navegar_para_pagina(page, tipo_formulario):
         time.sleep(0.6)
 
 
-def checkbox_marcado(ponto):
-    with mss.MSS() as sct:
-        monitor = sct.monitors[0]
-        screenshot = sct.grab(monitor)
-
-    x = ponto["x"] - monitor["left"]
-    y = ponto["y"] - monitor["top"]
-    if x < 0 or y < 0 or x >= screenshot.width or y >= screenshot.height:
-        return False
-
-    r, g, b = screenshot.pixel(x, y)[:3]
-    return b > 150 and g > 90 and r < 80
-
-
 def preencher_campo(campo, valor, ponto):
     if campo in CHECKBOX_FIELDS:
-        if not checkbox_marcado(ponto):
-            pyautogui.click(ponto["x"], ponto["y"])
+        pyautogui.click(ponto["x"], ponto["y"])
         time.sleep(1.0)
+    elif campo in SELECT_BY_INDEX:
+        pyautogui.click(ponto["x"], ponto["y"])
+        time.sleep(0.5)
+        for _ in range(SELECT_BY_INDEX[campo]):
+            pyautogui.press("down")
+            time.sleep(0.15)
+        pyautogui.press("enter")
+        time.sleep(0.7)
     elif campo in SELECT_FIELDS:
         pyautogui.click(ponto["x"], ponto["y"])
         time.sleep(0.5)
@@ -166,8 +164,6 @@ def preencher_campo(campo, valor, ponto):
     else:
         pyautogui.click(ponto["x"], ponto["y"])
         time.sleep(0.5)
-        pyautogui.hotkey("ctrl", "a")
-        time.sleep(0.1)
         colar_texto(valor)
 
 
