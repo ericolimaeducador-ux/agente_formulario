@@ -3,8 +3,9 @@ import time
 
 import pyautogui
 import pyperclip
+import mss
 
-from config import CAMPOS_FORMULARIO, COORDENADAS_PATH, VALORES_FIXOS
+from config import CAMPOS_FORMULARIO, COORDENADAS_PATH, MONITOR_FORMULARIO, VALORES_FIXOS
 
 
 SELECT_FIELDS = {
@@ -98,25 +99,75 @@ def colar_texto(texto):
     time.sleep(0.3)
 
 
-def navegar_para_pagina(page):
-    pyautogui.hotkey("ctrl", "home")
-    time.sleep(0.5)
+def _monitor_formulario():
+    with mss.MSS() as sct:
+        return dict(sct.monitors[MONITOR_FORMULARIO])
+
+
+def _arrastar_scroll(y_destino):
+    monitor = _monitor_formulario()
+    x = monitor["left"] + monitor["width"] - 8
+    y_inicio = monitor["top"] + monitor["height"] // 2
+    pyautogui.moveTo(x, y_inicio)
+    pyautogui.dragTo(x, y_destino, duration=0.35, button="left")
+    time.sleep(0.7)
+
+
+def rolar_para_topo():
+    monitor = _monitor_formulario()
+    _arrastar_scroll(monitor["top"] + 130)
+
+
+def rolar_para_baixo():
+    monitor = _monitor_formulario()
+    _arrastar_scroll(monitor["top"] + monitor["height"] - 62)
+
+
+def navegar_para_pagina(page, tipo_formulario):
+    if page == 0:
+        rolar_para_topo()
+        return
+
+    if tipo_formulario == "veiculo":
+        rolar_para_baixo()
+        return
+
+    rolar_para_topo()
     for _ in range(page):
         pyautogui.press("pagedown")
         time.sleep(0.6)
 
 
+def checkbox_marcado(ponto):
+    with mss.MSS() as sct:
+        monitor = sct.monitors[0]
+        screenshot = sct.grab(monitor)
+
+    x = ponto["x"] - monitor["left"]
+    y = ponto["y"] - monitor["top"]
+    if x < 0 or y < 0 or x >= screenshot.width or y >= screenshot.height:
+        return False
+
+    r, g, b = screenshot.pixel(x, y)[:3]
+    return b > 150 and g > 90 and r < 80
+
+
 def preencher_campo(campo, valor, ponto):
-    pyautogui.click(ponto["x"], ponto["y"])
-    time.sleep(0.3)
     if campo in CHECKBOX_FIELDS:
-        time.sleep(0.3)
+        if not checkbox_marcado(ponto):
+            pyautogui.click(ponto["x"], ponto["y"])
+        time.sleep(1.0)
     elif campo in SELECT_FIELDS:
+        pyautogui.click(ponto["x"], ponto["y"])
+        time.sleep(0.5)
         colar_texto(valor)
         pyautogui.press("enter")
         time.sleep(0.3)
     else:
+        pyautogui.click(ponto["x"], ponto["y"])
+        time.sleep(0.5)
         pyautogui.hotkey("ctrl", "a")
+        time.sleep(0.1)
         colar_texto(valor)
 
 
@@ -162,7 +213,7 @@ def preencher_formulario(dados, tipo_formulario):
         key=lambda item: (item[2]["page"], ordem.get(item[0], 999)),
     ):
         if ponto["page"] != pagina_atual:
-            navegar_para_pagina(ponto["page"])
+            navegar_para_pagina(ponto["page"], tipo_formulario)
             pagina_atual = ponto["page"]
 
         preencher_campo(campo, valor, ponto)
