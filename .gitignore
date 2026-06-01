@@ -1,0 +1,6 @@
+.env
+coordenadas.json
+.sixth/
+__pycache__/
+*.pyc
+tela2*.png
