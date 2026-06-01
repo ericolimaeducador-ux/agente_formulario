@@ -114,6 +114,8 @@ def extrair_dados(img_base64_tela1, tipo_formulario):
                 "qtd_eixos": "",
                 "data_validade": ""
             }
+            data_validade deve ser a data de validade/vencimento do CRLV que aparece no documento.
+            Retorne data_validade no formato dd/mm/aaaa quando possivel.
             Retorne APENAS o JSON.""",
         "transportadora": """Analise este documento e extraia em JSON:
             {

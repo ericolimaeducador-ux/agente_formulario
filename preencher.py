@@ -27,6 +27,8 @@ CHECKBOX_FIELDS = {
 SELECT_BY_INDEX = {
     # Segunda opcao da lista suspensa do Tipo de veiculo.
     "tipo_veiculo": 2,
+    # Segunda opcao da lista suspensa: TAC - Independente.
+    "classificacao_fiscal": 2,
 }
 
 
