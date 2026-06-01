@@ -4,3 +4,4 @@ coordenadas.json
 __pycache__/
 *.pyc
 tela2*.png
+logs/

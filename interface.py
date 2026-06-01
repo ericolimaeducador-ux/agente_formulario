@@ -6,6 +6,8 @@ import tkinter as tk
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
+LOG_DIR = PROJECT_DIR / "logs"
+LOG_PATH = LOG_DIR / "agente.log"
 
 
 class BotaoFlutuante:
@@ -103,13 +105,16 @@ class BotaoFlutuante:
             if resultado.returncode == 0:
                 self.atualizar_status("Concluido")
             else:
-                self.atualizar_status("Erro")
+                erro = self.resumir_erro(resultado)
+                self.salvar_log(resultado)
+                self.atualizar_status(erro)
                 if resultado.stdout:
                     print(resultado.stdout)
                 if resultado.stderr:
                     print(resultado.stderr, file=sys.stderr)
         except Exception as exc:
-            self.atualizar_status(f"Erro: {exc}")
+            self.salvar_log_texto(f"Erro inesperado na interface: {exc}")
+            self.atualizar_status("Erro na interface")
         finally:
             self.root.after(
                 0,
@@ -122,6 +127,30 @@ class BotaoFlutuante:
 
     def atualizar_status(self, texto):
         self.root.after(0, lambda: self.status.config(text=texto))
+
+    def resumir_erro(self, resultado):
+        texto = (resultado.stderr or resultado.stdout or "").strip()
+        if "GEMINI_API_KEY" in texto:
+            return "Configure GEMINI_API_KEY"
+        if not texto:
+            return "Erro"
+
+        ultima_linha = texto.splitlines()[-1].strip()
+        if ultima_linha.startswith("ERRO:"):
+            ultima_linha = ultima_linha.replace("ERRO:", "", 1).strip()
+        return ultima_linha[:26] or "Erro"
+
+    def salvar_log(self, resultado):
+        conteudo = []
+        if resultado.stdout:
+            conteudo.append("STDOUT:\n" + resultado.stdout)
+        if resultado.stderr:
+            conteudo.append("STDERR:\n" + resultado.stderr)
+        self.salvar_log_texto("\n\n".join(conteudo))
+
+    def salvar_log_texto(self, texto):
+        LOG_DIR.mkdir(exist_ok=True)
+        LOG_PATH.write_text(texto or "Sem detalhes.", encoding="utf-8")
 
     def iniciar(self):
         self.root.mainloop()
