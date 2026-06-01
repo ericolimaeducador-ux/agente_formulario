@@ -24,11 +24,10 @@ CHECKBOX_FIELDS = {
     "nao_encontrei_veiculo",
 }
 
-SELECT_BY_INDEX = {
-    # Segunda opcao da lista suspensa do Tipo de veiculo.
-    "tipo_veiculo": 2,
-    # Segunda opcao da lista suspensa: TAC - Independente.
-    "classificacao_fiscal": 2,
+SELECT_BY_TEXT = {
+    "tipo_veiculo": "plataforma 5mts",
+    "classificacao_fiscal": "tac",
+    "classificacao_fiscal_mdfe": "tac",
 }
 
 
@@ -122,12 +121,20 @@ def _arrastar_scroll(y_destino):
 
 def rolar_para_topo():
     monitor = _monitor_formulario()
-    _arrastar_scroll(monitor["top"] + 130)
+    pyautogui.click(monitor["left"] + monitor["width"] // 2, monitor["top"] + monitor["height"] // 2)
+    time.sleep(0.2)
+    pyautogui.press("home")
+    time.sleep(0.4)
+    pyautogui.scroll(10)
+    time.sleep(0.4)
 
 
 def rolar_para_baixo():
     monitor = _monitor_formulario()
-    _arrastar_scroll(monitor["top"] + monitor["height"] - 62)
+    pyautogui.click(monitor["left"] + monitor["width"] // 2, monitor["top"] + monitor["height"] // 2)
+    time.sleep(0.2)
+    pyautogui.scroll(-8)
+    time.sleep(0.6)
 
 
 def navegar_para_pagina(page, tipo_formulario):
@@ -149,12 +156,10 @@ def preencher_campo(campo, valor, ponto):
     if campo in CHECKBOX_FIELDS:
         pyautogui.click(ponto["x"], ponto["y"])
         time.sleep(1.0)
-    elif campo in SELECT_BY_INDEX:
+    elif campo in SELECT_BY_TEXT:
         pyautogui.click(ponto["x"], ponto["y"])
         time.sleep(0.5)
-        for _ in range(SELECT_BY_INDEX[campo]):
-            pyautogui.press("down")
-            time.sleep(0.15)
+        pyautogui.write(SELECT_BY_TEXT[campo], interval=0.03)
         pyautogui.press("enter")
         time.sleep(0.7)
     elif campo in SELECT_FIELDS:
